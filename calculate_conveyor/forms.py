@@ -30,4 +30,6 @@ class ConveyorForm(forms.Form):
 
 
 class ResultForm(forms.Form):
-    name = forms.CharField(max_length=10)
+    # name = forms.CharField(max_length=10)
+    save_choices = [(True, 'Yes'), (False, 'No')]
+    save = forms.ChoiceField(choices=save_choices, widget=forms.RadioSelect, label='')

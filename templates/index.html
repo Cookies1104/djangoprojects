@@ -14,7 +14,8 @@ https://drive.google.com/open?id=1mHdPtzfdRslaLjVqzTLBABMxM9PY6q4Q&authuser=3d.m
 
 
 <h2>Заполните данные:</h2>
-<form action="{% url 'result' %}" method="GET">
+<form action="{% url 'result' %}" method="POST">
+    {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Отправить</button>
 </form>

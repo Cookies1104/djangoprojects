@@ -302,10 +302,10 @@ class Calculate:
                 drive_drum_diameter = cof['drum_diameter'][x + 1]
         torque = round(0.5 * force_on_drum * drive_drum_diameter, 2)
         length_drive_drum = cof['length_drum_dictionary'][str(belt_width)]
-        distance_between_bearings = cof['width_conveyor'][str(belt_width)]
+        width_frame = cof['width_conveyor'][str(belt_width)]
         shaft_drive_drum = (
             ((((load_incoming + load_escaping) * 10) / 2) * (
-                (distance_between_bearings - length_drive_drum) * 0.001) / (65 * 1000000)) ** (1 / 3) * 1000
+                (width_frame - length_drive_drum) * 0.001) / (65 * 1000000)) ** (1 / 3) * 1000
         )
         shafts = []
         for i in cof['shafts']:
@@ -353,7 +353,7 @@ class Calculate:
         SAVE["angle_conveyor"] = angle_conveyor
         SAVE['angle_conveyor_max'] = angle_conveyor_max
         SAVE['angle_phi'] = angle_phi
-        SAVE['distance_between_bearings'] = distance_between_bearings
+        SAVE['width_frame'] = width_frame
         SAVE['belt_width'] = belt_width
         SAVE["count_gasket"] = count_gasket
         SAVE["k_p"] = k_p
