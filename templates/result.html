@@ -6,10 +6,34 @@
 </head>
 <body>
 
-<h2>Сохранить результаты расчёта?:</h2>
+<h2>Для сохранения результатов расчёта введите название конвейера и нажмите отправить:</h2>
 <form action="{% url 'save' %}" method="POST">
     {% csrf_token %}
-    {{ save }}
+    <label>Название конвейера:</label>
+    <input type="text" name="name_conveyor">
+    <input type="hidden" name="capacity_calc" value="{{ capacity_calc }}" >
+    <input type="hidden" name="speed" value="{{ speed }}" >
+    <input type="hidden" name="speed_max" value="{{ speed_max }}" >
+    <input type="hidden" name="angle_conveyor" value="{{ angle_conveyor }}" >
+    <input type="hidden" name="angle_conveyor_max" value="{{ angle_conveyor_max }}" >
+    <input type="hidden" name="angle_phi" value="{{ angle_phi }}" >
+    <input type="hidden" name="width_frame" value="{{ width_frame }}" >
+    <input type="hidden" name="belt_width" value="{{ belt_width }}" >
+    <input type="hidden" name="count_gasket" value="{{ count_gasket }}" >
+    <input type="hidden" name="k_p" value="{{ k_p }}" >
+    <input type="hidden" name="distance_idlers" value="{{ distance_idlers }}" >
+    <input type="hidden" name="distance_idlers_down" value="{{ distance_idlers_down }}" >
+    <input type="hidden" name="d_idlers" value="{{ d_idlers }}" >
+    <input type="hidden" name="drive_drum_diameter" value="{{ drive_drum_diameter }}" >
+    <input type="hidden" name="driven_drum" value="{{ driven_drum }}" >
+    <input type="hidden" name="revolving_drum" value="{{ revolving_drum }}" >
+    <input type="hidden" name="deflecting_drum" value="{{ deflecting_drum }}" >
+    <input type="hidden" name="shaft_drive_drum" value="{{ shaft_drive_drum }}" >
+    <input type="hidden" name="motor_power_calc" value="{{ motor_power_calc }}" >
+    <input type="hidden" name="torque" value="{{ torque }}" >
+    <input type="hidden" name="rotation_speed_drive_drum" value="{{ rotation_speed_drive_drum }}" >
+    <input type="hidden" name="brake" value="{{ brake }}" >
+    <input type="hidden" name="tension_length" value="{{ tension_length }}" >
     <button type="submit">Отправить</button>
 </form>
 
@@ -22,9 +46,10 @@
 <p> Полученный угол конвейера {{ angle_conveyor }} градусов;</p>
 <p>Максимальный угол конвейера для данных условий {{ angle_conveyor_max }} градусов;</p>
 <p>Угол естественного откоса материала {{ angle_phi }} градусов</p>
+<p>Ширина рамы конвейера {{ width_frame }} мм</p>
 <p>Ширина ленты {{ belt_width }} мм</p>
 <p>Количество тяговых прокладок ленты - {{ count_gasket }}</p>
-<p>Прочность тяговой прокладки - {{  k_p }}</p>
+<p>Прочность тяговой прокладки - {{ k_p }}</p>
 <p>Расстояние между верхними роликоопорами {{ distance_idlers }} м</p>
 <p>Расстояние между нижними роликоопорами {{ distance_idlers_down }} м</p>
 <p>Диаметр ролика {{ d_idlers }} мм</p>

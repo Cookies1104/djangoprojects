@@ -28,11 +28,10 @@ class Calculate:
     """Расчёт конвейера после ввода данных"""
     global SAVE, material_choices
 
-    def __init__(self, name_conveyor, capacity, number_of_conveyor, material, material_size,
+    def __init__(self, capacity, number_of_conveyor, material, material_size,
                  ascent_or_descent, length_conveyor, height_conveyor, drop_height, point_speed,
                  point_precipitation, point_conditions, lining, drum_girth_angle, KPD):
         """Инициализация атрибутов"""
-        self.name_conveyor = name_conveyor
         self.capacity = float(capacity)
         self.number_of_conveyor = int(number_of_conveyor)
         self.material = material
@@ -177,7 +176,6 @@ class Calculate:
                 ) + load_material * self.height_conveyor)) / 1000
             )
 
-        print(force_on_drum)
         if self.lining == True:
             friction = fun_rate_calculate(point_w, cof["friction"], 1)
         else:
@@ -196,7 +194,6 @@ class Calculate:
         load_incoming = force_on_drum * traction_factor
         load_escaping = load_incoming - force_on_drum
 
-        print(load_escaping, load_incoming)
         # Определение мощности привода.
         motor_power = force_on_drum * speed / 100
         if motor_power > 50:
@@ -262,7 +259,8 @@ class Calculate:
             d_rollers = 194
         elif belt_width == 1400 and density < 3.15 and speed < 4:
             d_rollers = 194
-        if belt_width in (1600, 2000) and density < 3.15 and speed < 6.3:
+        # if belt_width in (1600, 2000) and density < 3.15 and speed < 6.3:
+        else:
             d_rollers = 194
 
         # Определение диаметра барабанов и валов.
@@ -310,7 +308,6 @@ class Calculate:
         shafts = []
         for i in cof['shafts']:
             shafts.append(i)
-        print(shafts)
         random_list = []
         for i in cof['shafts'].keys():
             random_list.append((abs(shaft_drive_drum - int(i)), int(i)))

@@ -4,10 +4,8 @@ from django.db import models
 # Create your models here.
 class Conveyor(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
-    name = models.TextField(max_length=10, db_index=True, verbose_name='Название конвейера (код)')
     capacity = models.FloatField(verbose_name='Производительность в т/ч')
     number_of_conveyor = models.IntegerField(verbose_name='Количество конвейеров в шт')
-    capacity_calc = models.FloatField(verbose_name='Расчётная производительность в т/ч')
     material = models.CharField(max_length=10)
     material_size = models.FloatField(verbose_name='Размер кусков материала в мм')
     ascent_or_descent = models.BooleanField(verbose_name='Конвейер работает на спуск')
@@ -23,11 +21,8 @@ class Conveyor(models.Model):
     drum_girth_angle = models.IntegerField(verbose_name='Угол обхвата барабана лентой')
     KPD = models.FloatField(verbose_name='КПД двигателя')
 
-    def __str__(self):
-        return self.name
-
     class Meta:
-        verbose_name = '"Конвейер"'
+        verbose_name = 'Конвейер'
         verbose_name_plural = 'Конвейеры'
 
 
@@ -63,3 +58,7 @@ class ResultCalculate(models.Model):
     class Meta:
         verbose_name = 'Результат'
         verbose_name_plural = 'Результаты'
+
+
+# class StatusCalculate(models.Model):
+#     status = models.BooleanField(verbose_name='Статус сохранения расчёта')
