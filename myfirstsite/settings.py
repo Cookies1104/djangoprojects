@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'calculate_conveyor.apps.CalculateConveyorConfig',
+    'cross_section.apps.CrossSectionConfig',
 ]
 
 MIDDLEWARE = [

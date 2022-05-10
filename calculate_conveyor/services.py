@@ -20,13 +20,51 @@ def fun_closest_value(value, iterable) -> float:
     return result[1]
 
 
-SAVE = {}
+def get_data_from_request(request):
+    """Конвертирует тело запроса в словарь, а также добавлняет значения при необходимости."""
+    try:
+        data = dict()
+        for key, item in request.POST.items():
+            data[key] = item
+
+        if 'csrfmiddlewaretoken' in data.keys():
+            data.pop('csrfmiddlewaretoken')
+        if 'name_conveyor' in data.keys():
+            data.pop('name_conveyor')
+
+        if 'ascent_or_descent' in request.POST:
+            data['ascent_or_descent'] = True
+        else:
+            data['ascent_or_descent'] = False
+        if 'point_speed' in request.POST:
+            data['point_speed'] = True
+        else:
+            data['point_speed'] = False
+        if 'point_precipitation' in request.POST:
+            data['point_precipitation'] = True
+        else:
+            data['point_precipitation'] = False
+        if 'point_conditions' in request.POST:
+            data['point_conditions'] = True
+        else:
+            data['point_conditions'] = False
+        if 'lining' in request.POST:
+            data['lining'] = True
+        else:
+            data['lining'] = False
+
+        return data
+
+    except:
+        return None
+
+
 material_choices = [('1', 'Щебень'), ('2', 'Глина')]
 
 
-class Calculate:
+class BeltConveyor:
     """Расчёт конвейера после ввода данных"""
-    global SAVE, material_choices
+    material_choices = [('1', 'Щебень'), ('2', 'Глина')]
 
     def __init__(self, capacity, number_of_conveyor, material, material_size,
                  ascent_or_descent, length_conveyor, height_conveyor, drop_height, point_speed,
@@ -50,7 +88,6 @@ class Calculate:
     def calculate(self) -> dict:
         """Выполняет расчёт конвейера по полученным данным"""
         # Раздел 2 пособия. Определения основных параметров конвейеров.
-        global SAVE
         with open('cof.json', 'r') as cf:
             cof = js.load(cf)
 
@@ -64,7 +101,7 @@ class Calculate:
         angle_conveyor_max = int(cof['material'][self.material]['angle_conveyor_max'])
         abrasiveness = int(cof['material'][self.material]['abrasiveness'])
 
-        if self.ascent_or_descent == True:
+        if self.ascent_or_descent:
             angle_conveyor_max -= 8
             ascent_or_descent = 1
             angle_phi -= 8
@@ -241,26 +278,23 @@ class Calculate:
             x -= 0.05
             distance_idlers_down = x * distance_idlers
 
-        if belt_width in (400, 500, 650):
-            if density < 1.6 and speed < 2:
-                d_rollers = 89
-            elif density < 2 and speed < 2.5:
-                d_rollers = 108
+        if belt_width in (400, 500, 650) and density < 1.6 and speed < 2:
+            d_rollers = 89
+        elif belt_width in (400, 500, 650) and density < 2 and speed < 2.5:
+            d_rollers = 108
         elif belt_width == 800 and density < 1.6 and speed < 1.6:
             d_rollers = 89
-        elif belt_width in (800, 1000, 1200):
-            if density < 1.6 and speed < 2.5:
-                d_rollers = 108
-            elif density < 2 and speed < 2.5:
-                d_rollers = 127
-            elif density < 3.15 and speed < 4:
-                d_rollers = 159
+        elif belt_width in (800, 1000, 1200) and density < 1.6 and speed < 2.5:
+            d_rollers = 108
+        elif belt_width in (800, 1000, 1200) and density < 2 and speed < 2.5:
+            d_rollers = 127
+        elif belt_width in (800, 1000, 1200) and density < 3.15 and speed < 4:
+            d_rollers = 159
         elif belt_width in (1400, 1600, 2000) and density < 3.15 and speed < 3.1:
             d_rollers = 194
         elif belt_width == 1400 and density < 3.15 and speed < 4:
             d_rollers = 194
-        # if belt_width in (1600, 2000) and density < 3.15 and speed < 6.3:
-        else:
+        elif belt_width in (1600, 2000) and density < 3.15 and speed < 6.3:
             d_rollers = 194
 
         # Определение диаметра барабанов и валов.
@@ -344,27 +378,28 @@ class Calculate:
         tension_length = round(tension_length_inst + tension_length_work)
 
         # Вывод данных.
-        SAVE['capacity_calc'] = capacity
-        SAVE['speed'] = speed
-        SAVE['speed_max'] = speed_max
-        SAVE["angle_conveyor"] = angle_conveyor
-        SAVE['angle_conveyor_max'] = angle_conveyor_max
-        SAVE['angle_phi'] = angle_phi
-        SAVE['width_frame'] = width_frame
-        SAVE['belt_width'] = belt_width
-        SAVE["count_gasket"] = count_gasket
-        SAVE["k_p"] = k_p
-        SAVE["distance_idlers"] = distance_idlers
-        SAVE['distance_idlers_down'] = round(distance_idlers_down, 2)
-        SAVE['d_rollers'] = d_rollers
-        SAVE['drive_drum_diameter'] = drive_drum_diameter
-        SAVE['driven_drum'] = driven_drum
-        SAVE['revolving_drum'] = revolving_drum
-        SAVE['deflecting_drum'] = deflecting_drum
-        SAVE['shaft_drive_drum'] = shaft_drive_drum
-        SAVE['motor_power_calc'] = math.ceil(motor_power_calc)
-        SAVE['brake'] = brake
-        SAVE['tension_length'] = tension_length
-        SAVE['torque'] = torque
-        SAVE['rotation_speed_drive_drum'] = rotation_speed_drive_drum
-        return SAVE
+        data = dict()
+        data['capacity_calc'] = capacity
+        data['speed'] = speed
+        data['speed_max'] = speed_max
+        data["angle_conveyor"] = angle_conveyor
+        data['angle_conveyor_max'] = angle_conveyor_max
+        data['angle_phi'] = angle_phi
+        data['width_frame'] = width_frame
+        data['belt_width'] = belt_width
+        data["count_gasket"] = count_gasket
+        data["k_p"] = k_p
+        data["distance_idlers"] = distance_idlers
+        data['distance_idlers_down'] = round(distance_idlers_down, 2)
+        data['d_rollers'] = d_rollers
+        data['drive_drum_diameter'] = drive_drum_diameter
+        data['driven_drum'] = driven_drum
+        data['revolving_drum'] = revolving_drum
+        data['deflecting_drum'] = deflecting_drum
+        data['shaft_drive_drum'] = shaft_drive_drum
+        data['motor_power_calc'] = math.ceil(motor_power_calc)
+        data['brake'] = brake
+        data['tension_length'] = tension_length
+        data['torque'] = torque
+        data['rotation_speed_drive_drum'] = rotation_speed_drive_drum
+        return data

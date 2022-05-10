@@ -1,8 +1,5 @@
 from django.contrib import admin
-from .models import Conveyor
+from .models import ConveyorModel
 
 
-# Register your models here.
-# class CalculateAdmin(admin.ModelAdmin):
-#     list_display = ()
-admin.site.register(Conveyor)
+admin.site.register(ConveyorModel)

@@ -1,116 +1,62 @@
 from django.shortcuts import render, redirect
-from .models import Conveyor, ResultCalculate
-from .services import Calculate
+from django.views.decorators.http import require_http_methods
+from django.views.generic.detail import DetailView
+
+from .models import ConveyorModel
+from .services import BeltConveyor, get_data_from_request
 from .forms import ConveyorForm
 
 
-# Create your views here.
-def calculate(request):
+
+class Index(DetailView):
+    model = BeltConveyor
+
+
+
+@require_http_methods(['GET', 'POST'])
+def data_entry_page_for_conveyor_calculation(request):
     """Рендерит страницу ввода данных для расчёта конвейера"""
-    return render(request, './index.html', {
-        'form': ConveyorForm()
-    })
+    print(request.method)
+    if request.method == 'POST':
+        request_data = get_data_from_request(request)
+        if request_data is None:
+            return redirect('calculate', permanent=True)
 
-
-def result(request):
-    """Если POST - рендерит страницу результата расчёта с формой предложения сохранить
-    результат расчёта.
-        Если no POST - возвращает на страницу ввода данных для расчёта"""
-    if request.POST:
-        if 'ascent_or_descent' in request.POST:
-            ascent_or_descent = True
-        else:
-            ascent_or_descent = False
-        if 'point_speed' in request.POST:
-            point_speed = True
-        else:
-            point_speed = False
-        if 'point_precipitation' in request.POST:
-            point_precipitation = True
-        else:
-            point_precipitation = False
-        if 'point_conditions' in request.POST:
-            point_conditions = True
-        else:
-            point_conditions = False
-        if 'lining' in request.POST:
-            lining = True
-        else:
-            lining = False
-
-        first_conveyor = Calculate(
-            capacity=request.POST['capacity'],
-            number_of_conveyor=request.POST['number_of_conveyor'],
-            material=request.POST['material'],
-            material_size=request.POST['material_size'],
-            ascent_or_descent=ascent_or_descent,
-            length_conveyor=request.POST['length_conveyor'],
-            height_conveyor=request.POST['height_conveyor'],
-            drop_height=request.POST['drop_height'],
-            point_speed=point_speed,
-            point_precipitation=point_precipitation,
-            point_conditions=point_conditions,
-            lining=lining,
-            drum_girth_angle=request.POST['drum_girth_angle'],
-            KPD=request.POST['KPD']
-        )
-
-        result_dict = first_conveyor.calculate()
-
-        element = Conveyor(
-            capacity=request.POST['capacity'],
-            number_of_conveyor=request.POST['number_of_conveyor'],
-            material=request.POST['material'],
-            material_size=request.POST['material_size'],
-            ascent_or_descent=ascent_or_descent,
-            length_conveyor=request.POST['length_conveyor'],
-            height_conveyor=request.POST['height_conveyor'],
-            drop_height=request.POST['drop_height'],
-            point_speed=point_speed,
-            point_precipitation=point_precipitation,
-            point_conditions=point_conditions,
-            lining=lining,
-            drum_girth_angle=request.POST['drum_girth_angle'],
-            KPD=request.POST['KPD']
-        )
-        element.save()
-        return render(request, './result.html', result_dict)
+        calculate_data = BeltConveyor(**request_data).calculate()
+        request.session['data'] = request_data
+        return render(request, './result.html', calculate_data)
     else:
-        return redirect('calculate', permanent=True)
+        return render(request, './index.html', {
+            'form': ConveyorForm()
+        })
 
 
-def save(request):
-    """Если POST рендерит страницу успешного сохранения и присваивает значение True в бд.
-        Если no POST возвращает на страницу ввода данных для расчёта."""
+# def conveyor_calculation_results_page(request):
+#     """Если POST - рендерит страницу результата расчёта с формой предложения сохранить
+#     результат расчёта.
+#     Иначе - возвращает на страницу ввода данных для расчёта.
+#     Передаёт введёныне пользователем данные, а также результаты расчёта в сессию"""
+#     if request.POST:
+#         request_data = get_data_from_request(request)
+#         if request_data is None:
+#             return redirect('calculate', permanent=True)
+#
+#         calculate_data = BeltConveyor(**request_data).calculate()
+#         request.session['data'] = request_data
+#         return render(request, './result.html', calculate_data)
+#     else:
+#         return redirect('calculate', permanent=True)
+
+
+def save_page_complete(request):
+    """Если POST сохраняет в бд экземпляр конвейера.
+        Иначе - возвращает на страницу ввода данных для расчёта."""
     if request.POST:
-        print(request.POST)
-        element = ResultCalculate(
-            name=request.POST['name_conveyor'],
-            capacity=request.POST['capacity_calc'],
-            speed=request.POST['speed'],
-            speed_max=request.POST['speed_max'],
-            angle_conveyor=request.POST['angle_conveyor'],
-            angle_conveyor_max=request.POST['angle_conveyor_max'],
-            angle_phi=request.POST['angle_phi'],
-            width_frame=request.POST['width_frame'],
-            belt_width=request.POST['belt_width'],
-            count_gasket=request.POST['count_gasket'],
-            k_p=request.POST['k_p'],
-            distance_idlers=request.POST['distance_idlers'],
-            distance_idlers_down=request.POST['distance_idlers_down'],
-            diameter_rollers=request.POST['diameter_rollers'],
-            drive_drum_diameter=request.POST['drive_drum_diameter'],
-            driven_drum=request.POST['driven_drum'],
-            revolving_drum=request.POST['revolving_drum'],
-            deflecting_drum=request.POST['deflecting_drum'],
-            shaft_drive_drum=request.POST['shaft_drive_drum'],
-            motor_power_calc=request.POST['motor_power_calc'],
-            brake=request.POST['brake'],
-            tension_length=request.POST['tension_length'],
-            torque=request.POST['torque'],
-            rotation_speed_drive_drum=request.POST['rotation_speed_drive_drum'],
-        )
-        element.save()
-        return render(request, './save.html')
+        data = get_data_from_request(request) | request.session['data']
+        name_conveyor = request.POST.get('name_conveyor', None)
+
+        ConveyorModel(name=name_conveyor, data=data)#.save()
+
+        return render(request, './save.html', {'name': name_conveyor})
     else:
         return redirect('calculate', permanent=True)
